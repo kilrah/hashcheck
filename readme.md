@@ -58,6 +58,8 @@ An output file can be specified using `-o` which will by default contain the imp
 A session number can be specified with `-s`, it has no use other than being included in a DB column for later use.
 The `-t` option will do a test run, i.e. list all operations but without modifying the database.
 
+By default during a check no progress is visible in the console to keep emphasis on any detected errors, use `-v` to see folder scan progress. A simultaneous output (`-o`) to a file would stay clean. 
+
 Typical usage examples:
 - `python3 hashcheck.py -g [path]` to hash either the specified file or all files in the specified directory non-recursively
 - `python3 hashcheck.py -gr [path]` to hash files in the specified directory recursively

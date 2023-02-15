@@ -245,7 +245,7 @@ def check_hashes(filter):
         else:
             output("File missing: {}".format(filename), 0, 0)
 
-def prune_db(filter):
+def prune_db(abspath):
     filelist = getSubset(abspath, False, True)
     output("Pruning DB...")
     mem_db.execute("DELETE FROM hashes WHERE filename in ({seq})".format(seq=','.join(['?']*len(filelist))), filelist)
@@ -334,12 +334,9 @@ if __name__ == "__main__" :
 
     elif args.prune:
         if os.path.exists(abspath):
-            filter = getFilter(abspath)
+            prune_db(abspath)
         else:
-            # Avoid a % for an already deleted file
-            filter = abspath
-        
-        prune_db(filter)
+            output("Invalid path! {}".format(abspath))
 
     elif args.enumerate or args.missing:
         if args.enumerate:    
