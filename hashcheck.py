@@ -110,15 +110,6 @@ def getSubset(abspath, new, recursive):
 def hash_file(filepath):
     
     try:
-        # Python >= 3.11 only
-        """
-        with open(filepath,"rb") as f:
-            digest = hashlib.file_digest(f, "sha256")
-            f.close()
-        return digest.hexdigest()
-        """
-        
-        # For python < 3.11
         with open(filepath,"rb") as f: 
             file_hash = hashlib.sha256()
             chunk = f.read(1048576)
@@ -219,20 +210,15 @@ def check_hashes(filter):
             output("File missing: {}".format(filename), 0, 0)
 
 def prune_db(filter):
-    crsr = mem_db.cursor()
-    for row in crsr.execute("SELECT * FROM hashes WHERE filename LIKE ?", (filter,)):
-        filename = row[1]
-        if not os.path.isfile(filename):
-            if not args.test_run:
-                output("Deleting file entry {}".format(filename), 0, 0)
-                mem_db.execute("DELETE FROM hashes WHERE filename=?", (filename,))
-                mem_db.commit()
-            else:
-                output("Skipped deleting entry {}".format (filename), 0, 0)
+    filelist = getSubset(abspath, False, True)
+    output("Pruning DB...")
+    mem_db.execute("DELETE FROM hashes WHERE filename in ({seq})".format(seq=','.join(['?']*len(filelist))), filelist)
+    mem_db.commit()
 
 def save_db():
     if not args.test_run:
         output("Saving DB...")
+        mem_db.commit()
         mem_db.backup(db)
         db.commit()
 
