@@ -80,9 +80,13 @@ def parse_args():
             output("Path conversion to [w]indows or [u]nix")
             exit(1)
 
-    if args.copy_to != None and not (args.generate or args.check):
-        output("Copy only supported while generating or checking")
-        exit(1)
+    if args.copy_to != None:
+        if not (args.generate or args.check):
+            output("Copy only supported while generating or checking!")
+            exit(1)
+        if os.path.abspath(args.path) in os.path.abspath(args.copy_to):
+            output("Copy destination can't be inside the source folder!")
+            exit(1)
 
     return args
 
@@ -113,7 +117,10 @@ def getFilter(path):
     if os.path.isfile(path):
         filter = path
     elif os.path.isdir(path):
-        filter = path + os.sep + "%"
+        if(path[-1] != os.sep):
+            filter = path + os.sep + "%"
+        else:
+            filter = path + "%"
     else:
         filter = "%"
 

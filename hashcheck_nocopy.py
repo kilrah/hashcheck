@@ -83,7 +83,10 @@ def getFilter(path):
     if os.path.isfile(path):
         filter = path
     elif os.path.isdir(path):
-        filter = path + os.sep + "%"
+        if(path[-1] != os.sep):
+            filter = path + os.sep + "%"
+        else:
+            filter = path + "%"
     else:
         filter = "%"
 
