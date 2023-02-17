@@ -5,6 +5,31 @@ from datetime import datetime
 import os
 import signal
 import sys
+from filedate.Utils import Copy
+
+class destination_file():
+    def __init__(self, destdir):
+        self.destdir = destdir
+        self.sourcepath = None
+        self.destpath = None
+        self.destfile = None
+    
+    def open(self, filepath):
+        self.sourcepath = filepath
+        (drive, pathandfile) = os.path.splitdrive(filepath)
+        (path, file)  = os.path.split(pathandfile)
+        if not os.path.isdir(self.destdir + path):
+            os.makedirs(self.destdir + path)
+        self.destpath = self.destdir + pathandfile
+        self.destfile = open(self.destpath, "wb")
+
+    def write(self, data):
+        self.destfile.write(data)
+
+    def close(self):
+        self.destfile.close()
+        Copy(self.sourcepath, self.destpath).all()
+        self.destfile = None
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -24,6 +49,7 @@ def parse_args():
     parser.add_argument("--db-path", help="Path in DB", required=False)
     parser.add_argument("--fs-path", help="Path in filesystem", required=False)
     parser.add_argument("--path-conv-to", help="Convert slashes in paths to (u/w)", required=False)
+    parser.add_argument("--copy-to", help="Copy hashed files to destination", required=False)
     parser.add_argument("path", help="Path")
 
     args = parser.parse_args()
@@ -54,6 +80,10 @@ def parse_args():
             output("Path conversion to [w]indows or [u]nix")
             exit(1)
 
+    if args.copy_to != None and not (args.generate or args.check):
+        output("Copy only supported while generating or checking")
+        exit(1)
+
     return args
 
 def output(string, to_stdout = 0, to_file = None):
@@ -83,7 +113,7 @@ def getFilter(path):
     if os.path.isfile(path):
         filter = path
     elif os.path.isdir(path):
-        filter = path + "%"
+        filter = path + os.sep + "%"
     else:
         filter = "%"
 
@@ -108,15 +138,21 @@ def getSubset(abspath, new, recursive):
     return sorted(files)
 
 def hash_file(filepath):
-    
+    if destfile:
+        destfile.open(filepath)
+
     try:
         with open(filepath,"rb") as f: 
             file_hash = hashlib.sha256()
             chunk = f.read(1048576)
             while chunk:
                 file_hash.update(chunk)
+                if destfile:
+                    destfile.write(chunk)
                 chunk = f.read(1048576)
             f.close()
+            if destfile:
+                destfile.close()
         return file_hash.hexdigest()
 
     except (PermissionError, OSError):
@@ -247,6 +283,13 @@ if __name__ == "__main__" :
             exit(1)
     else:
         outfile = None
+
+    if args.copy_to != None and os.path.isdir(os.path.abspath(args.copy_to)):
+        destpath = os.path.abspath(args.copy_to)
+        destfile = destination_file(destpath)
+    else:
+        destpath = None
+        destfile = None
 
     if args.session == None:
         args.session = 1

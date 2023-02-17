@@ -5,7 +5,7 @@ Multiplatform python-based tool for file integrity verification.
 ## Basic Features
 
 - Hash files/folders using sha256 and store the file details (path, hash, size, created/modified dates) in a SQLite database
-- Verify files/folders against the stored hashes
+- Verify stored hashes against existing files/folders
 - Update DB entries against new file state
 - Find files missing from database / from filesystem
 - Prune missing files from database
@@ -14,12 +14,12 @@ Multiplatform python-based tool for file integrity verification.
 
 - Path remapping (used e.g. to generate hashes on one machine, then run the check on another machine hosting a backup where the paths are different)
 - Path conversion (for above scenario, in the case of different Windows/Unix OSes)
-- Copy while hashing (store hashes while making a backup copy)
+- Copy files to another location while generating or checking hashes
 
 ## Usage
 
-The `hashcheck.py` script on the does not implement the "Copy while hashing" feature and has no requirements other than a default install of Python >= 3.7.  
-The `hashcheck_copy.py` script does, but requires the python module `filedate`. Install with `pip install filedate`.
+The `hashcheck.py` script implements all functionality, but requires the python module `filedate`. Install with `pip install filedate`.
+The `hashcheck_nocopy.py` script skips the "Copy while hashing" feature but has no requirements other than a default install of Python >= 3.7, can be used if installing modules is not practical.
 
 The database being sqlite allows for easy external filtering/manipulation with tools such as [SQLite Browser](https://sqlitebrowser.org/) in case the desired filtering is not provided.
 
@@ -56,19 +56,20 @@ options:
 The database name can be specified using `-d` for storing separate DBs per drive, purpose,...  
 An output file can be specified using `-o` which will by default contain the important events that might be missed in the console output (hash mismatch, missing file, file couldn't be opened...). Verbosity both in the console and file can be increased with `-v`, `-vv` and `-vvv`  
 A session number can be specified with `-s`, it has no use other than being included in a DB column for later use.
-The `-t` option will do a test run, i.e. list all operations but without modifying the database.
+The `-t` option will do a test run, i.e. list all operations that would be done but without modifying the database.
 
 By default during a check no progress is visible in the console to keep emphasis on any detected errors, use `-v` to see folder scan progress. A simultaneous output (`-o`) to a file would stay clean. 
 
 Typical usage examples:
 - `python3 hashcheck.py -g [path]` to hash either the specified file or all files in the specified directory non-recursively
 - `python3 hashcheck.py -gr [path]` to hash files in the specified directory recursively
-- `python3 hashcheck.py -c [path]` to check files in the specified directory recursively against the database
+- `python3 hashcheck.py -o results.txt -c [path]` to check files in the specified directory recursively against the database and output the check results to `results.txt`
 - `python3 hashcheck.py -gru [path]` to re-hash files in the specified directory recursively and update the database if different
-- `python3 hashcheck.py -e [path]` to enumerate new files that have not yet been hashed, supports `-r`
-- `python3 hashcheck.py -m [path]` to list files missing in the specified directory recursively
+- `python3 hashcheck.py -e [path]` to list new files in the specified directory that have not yet been hashed, supports `-r`
+- `python3 hashcheck.py -m [path]` to list files present in the database but missing in the specified directory recursively
 - `python3 hashcheck.py -p [path]` to delete missing files in the specified directory recursively from the database
-- `python3 hashcheck.py -c --db-path C:\users\user\path --fs-path /mnt/backup --path-conv-to u /mnt/backup` to check a tree originally hashed from `C:\users\user\path` on a Windows machine that is now stored in `/mnt/backup` on a linux machine
+- `python3 hashcheck.py -c --db-path C:\\users\\user\\path --fs-path /mnt/backup --path-conv-to u /mnt/backup` to check a tree originally hashed from `C:\users\user\path` on a Windows machine that is now stored in `/mnt/backup` on a linux machine
+- `python3 hashcheck_copy.py -d mydb.sqlite --copy-to D:\Backup -g C:\Files` to hash the contents of files in `C:\Files` non-recursively, store the results in the `mydb.sqlite` database and simultaneously copy the files to `D:\Backup`
 
 ## Technical notes
 
