@@ -146,6 +146,8 @@ def generate_hashes(filelist, update):
         timediff = datetime.now() - lastsave
         if timediff.total_seconds() > 300:
             save_db()
+            if outfile != None:
+                outfile.flush()
             lastsave = datetime.now()
 
         dir = os.path.dirname(f)
@@ -191,17 +193,24 @@ def generate_hashes(filelist, update):
 
 def check_hashes(filter):
     prevdir = ""
+    lastsave = datetime.now()
     crsr = mem_db.cursor()
     for row in crsr.execute("SELECT * FROM hashes WHERE filename LIKE ?", (filter,)):
         filename = row[1]
         stored_hash = row[2]
-        output("Checking {}".format(filename), 2, 3)
+
+        timediff = datetime.now() - lastsave
+        if timediff.total_seconds() > 300 and outfile != None:
+            outfile.flush()
+            lastsave = datetime.now()
 
         if args.verbose > 0:
             dir = os.path.dirname(filename)
             if dir != prevdir:
                 prevdir = dir
                 output("Processing folder {}".format(prevdir))
+        
+        output("Checking {}".format(filename), 2, 3)
 
         if os.path.isfile(filename):
             hash = hash_file(filename)
@@ -244,7 +253,7 @@ if __name__ == "__main__" :
 
     if args.outfile:
         try:
-            outfile = open(args.outfile, "w")
+            outfile = open(args.outfile, "w", encoding="utf-8")
         except:
             output("Unable to open output file", 0)
             sys.exit(1)
