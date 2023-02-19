@@ -19,7 +19,8 @@ Multiplatform python-based tool for file integrity verification.
 ## Usage
 
 The `hashcheck.py` script implements all functionality, but requires the python module `filedate`. Install with `pip install filedate`.  
-The `hashcheck_nocopy.py` script skips the "Copy while hashing" feature but has no requirements other than a default install of Python >= 3.7, can be used if installing modules is not practical.
+The `hashcheck_nocopy.py` script skips the "Copy while hashing" feature but has no requirements other than a default install of Python >= 3.7, can be used if installing modules is not practical.  
+Standalone binaries with all functionality generated with PyInstaller are provided in Releases for Windows, Linux and MacOS.
 
 The database being sqlite allows for easy external filtering/manipulation with tools such as [SQLite Browser](https://sqlitebrowser.org/) in case the desired filtering is not provided.
 
