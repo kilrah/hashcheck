@@ -30,29 +30,29 @@ def parse_args():
 
     if args.recursive and not (args.generate or args.enumerate):
         output("--recursive only available with --generate or --enumerate")
-        exit(1)
+        sys.exit(1)
     
     if args.update and not args.generate:
         output("--update only available with --generate")
-        exit(1)
+        sys.exit(1)
 
     if args.session and not args.generate:
         output("--session only available with --generate")
-        exit(1)
+        sys.exit(1)
 
     if bool(args.db_path != None) ^ bool(args.fs_path != None):
         output("Path substitution needs both sides!")
-        exit(1)
+        sys.exit(1)
 
     if args.path_conv_to != None:
         if args.db_path == None:
             output("Path conversion only useful with path substitution!")
-            exit(1)
+            sys.exit(1)
 
         args.path_conv_to = args.path_conv_to.lower()
         if args.path_conv_to != "u" and args.path_conv_to !="w" :
             output("Path conversion to [w]indows or [u]nix")
-            exit(1)
+            sys.exit(1)
 
     return args
 
@@ -230,7 +230,7 @@ def terminate(exitcode):
         save_db()
     db.close()
     mem_db.close()
-    exit(exitcode)
+    sys.exit(exitcode)
 
 def exit_handler(signum, frame):
     output("Cancelled, exiting...")
@@ -247,7 +247,7 @@ if __name__ == "__main__" :
             outfile = open(args.outfile, "w")
         except:
             output("Unable to open output file", 0)
-            exit(1)
+            sys.exit(1)
     else:
         outfile = None
 
@@ -260,7 +260,7 @@ if __name__ == "__main__" :
         db.execute("CREATE TABLE IF NOT EXISTS hashes(id INTEGER PRIMARY KEY, filename TEXT NOT NULL, sha256 TEXT NOT NULL, filesize INTEGER, creation_date TEXT, modified_date TEXT, timestamp TEXT, session INTEGER)")
     except sqlite3.DatabaseError:
         output("Invalid DB file")
-        exit(2)
+        sys.exit(2)
     db.commit()
     db.backup(mem_db)
 
