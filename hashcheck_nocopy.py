@@ -7,7 +7,7 @@ import signal
 import sys
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Version 1.0.2")
     mode_group = parser.add_mutually_exclusive_group(required=True)
     mode_group.add_argument("-g", "--generate", help="Generate hashes for new files in specified file/directory", action='store_true')
     mode_group.add_argument("-c", "--check", help="Check stored hashes for specified file/directory (always recursively)", action='store_true')
