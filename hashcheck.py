@@ -367,7 +367,7 @@ if __name__ == "__main__" :
         for f in files:
             output ("{} {}".format(text, f), 0, 0)
 
-    output ("Time : {}".format (datetime.now()-start), 0)
+    output ("Time: {}".format (datetime.now()-start), 0, 0)
     terminate(0)
 
         
